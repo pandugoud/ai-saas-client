@@ -1,19 +1,42 @@
 import api from "./axios";
 
-export const registerApi = async (name, email, password) => {
-  const { data } = await api.post("/auth/register", { name, email, password });
-  return data;
+
+export const registerUser = (data)=>{
+
+return api.post(
+"/auth/register",
+data
+);
+
 };
 
-export const loginApi = async (email, password) => {
-  const { data } = await api.post("/auth/login", { email, password });
-  return data;
+
+
+export const loginUser=(data)=>{
+
+return api.post(
+"/auth/login",
+data
+);
+
 };
 
-export const meApi = async () => {
-  const { data } = await api.get("/auth/me");
-  return data;
-};
+// import api from "./axios";
+
+// export const registerApi = async (name, email, password) => {
+//   const { data } = await api.post("/auth/register", { name, email, password });
+//   return data;
+// };
+
+// export const loginApi = async (email, password) => {
+//   const { data } = await api.post("/auth/login", { email, password });
+//   return data;
+// };
+
+// export const meApi = async () => {
+//   const { data } = await api.get("/auth/me");
+//   return data;
+// };
 
 // import api from "./axios";
 
