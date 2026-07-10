@@ -20,125 +20,85 @@ const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://pandugoud.github.io",
-  "https://ai-saas-client.onrender.com"
+  "https://ai-saas-client.onrender.com",
+  "https://pandugoud.github.io"
 ];
 
 
-// const corsOptions = {
-
-//   origin: function (origin, callback) {
-
-//     // Allow Postman / server requests
-//     if (!origin) {
-//       return callback(null, true);
-//     }
-
-
-//     if (allowedOrigins.includes(origin)) {
-//       return callback(null, true);
-//     }
-
-
-//     console.log("Blocked CORS Origin:", origin);
-
-//     return callback(null, false);
-
-//   },
-
-
-//   methods: [
-//     "GET",
-//     "POST",
-//     "PUT",
-//     "DELETE",
-//     "OPTIONS"
-//   ],
-
-
-//   allowedHeaders: [
-//     "Content-Type",
-//     "Authorization"
-//   ],
-
-
-//   credentials: true,
-
-
-//   optionsSuccessStatus: 204
-
-// };
-
-
-// // CORS MUST BE FIRST
-// app.use(cors(corsOptions));
-
-
-// // Preflight requests
-// app.options("*", cors(corsOptions));
-const corsOptions = {
-  origin: "*",
-  methods: [
-    "GET",
-    "POST",
-    "PUT",
-    "DELETE",
-    "OPTIONS"
-  ],
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization"
-  ],
-};
-
-
-app.use(cors(corsOptions));
-
-app.options("*", cors(corsOptions));
-
-
-// ===============================
-// BODY PARSER
-// ===============================
-
-app.use(express.json());
-
 app.use(
-  express.urlencoded({
-    extended: true
+  cors({
+    origin: function (origin, callback) {
+
+      // Allow Postman / mobile / server requests
+      if (!origin) {
+        return callback(null, true);
+      }
+
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+
+      console.log("Blocked CORS origin:", origin);
+
+      return callback(null, false);
+    },
+
+
+    credentials: true,
+
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "PATCH",
+      "OPTIONS"
+    ],
+
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization"
+    ]
   })
 );
 
 
+// IMPORTANT
+app.use(express.json());
+app.use(express.urlencoded({ extended:true }));
+
+
 
 // ===============================
-// HEALTH CHECK
+// HEALTH
 // ===============================
 
-app.get("/", (req, res) => {
+app.get("/", (req,res)=>{
+  res.json({
+    success:true,
+    message:"AI SaaS Server Running"
+  });
+});
+
+
+app.get("/api/health",(req,res)=>{
 
   res.json({
-    success: true,
-    message: "AI SaaS API Running"
+    success:true,
+    message:"API Healthy"
   });
 
 });
 
-
-app.get("/api/health", (req, res) => {
-
-  res.json({
-    success: true,
-    message: "API Healthy"
-  });
-
-});
 
 
 
 // ===============================
 // API ROUTES
 // ===============================
+
 
 app.use(
   "/api/auth",
@@ -153,9 +113,12 @@ app.use(
 
 
 
+
+
 // ===============================
-// SERVE REACT FRONTEND (OPTIONAL)
+// SERVE REACT BUILD
 // ===============================
+
 
 const clientPath = path.join(
   __dirname,
@@ -168,8 +131,8 @@ app.use(
 );
 
 
-// React Router fallback
-app.get("*", (req, res) => {
+
+app.get("*",(req,res)=>{
 
   res.sendFile(
     path.join(
@@ -182,92 +145,100 @@ app.get("*", (req, res) => {
 
 
 
+
+
 // ===============================
 // ERROR HANDLER
 // ===============================
 
-app.use(
-  (err, req, res, next) => {
 
-    console.error(
-      "Server Error:",
-      err.message
-    );
+app.use((err,req,res,next)=>{
+
+  console.error(
+    "ERROR:",
+    err
+  );
 
 
-    res.status(500).json({
+  res.status(500).json({
 
-      success: false,
+    success:false,
 
-      message: err.message
+    message:err.message
 
-    });
+  });
 
-  }
+
+});
+
+
+
+
+
+
+// ===============================
+// DATABASE
+// ===============================
+
+
+async function startServer(){
+
+try{
+
+
+if(!process.env.MONGO_URI){
+
+throw new Error(
+"MONGO_URI missing"
+);
+
+}
+
+
+
+await mongoose.connect(
+process.env.MONGO_URI
 );
 
 
 
-// ===============================
-// DATABASE + SERVER START
-// ===============================
-
-async function startServer() {
-
-  try {
-
-
-    if (!process.env.MONGO_URI) {
-
-      throw new Error(
-        "MONGO_URI missing"
-      );
-
-    }
+console.log(
+"MongoDB Connected"
+);
 
 
 
-    await mongoose.connect(
-      process.env.MONGO_URI
-    );
+app.listen(
+PORT,
+"0.0.0.0",
+()=>{
 
-
-
-    console.log(
-      "✅ MongoDB Connected Successfully"
-    );
-
-
-
-    app.listen(
-      PORT,
-      "0.0.0.0",
-      () => {
-
-        console.log(
-          `🚀 Server running on port ${PORT}`
-        );
-
-      }
-    );
-
-
-  } catch (error) {
-
-
-    console.error(
-      "❌ MongoDB Connection Error:",
-      error.message
-    );
-
-
-    process.exit(1);
-
-
-  }
+console.log(
+`Server running on ${PORT}`
+);
 
 }
 
+);
+
+
+
+}
+catch(error){
+
+console.error(
+error.message
+);
+
+
+process.exit(1);
+
+
+}
+
+
+
+}
 
 
 startServer();
