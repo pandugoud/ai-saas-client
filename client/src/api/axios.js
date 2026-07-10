@@ -1,10 +1,16 @@
 import axios from "axios";
 
+
 const api = axios.create({
-  baseURL: "https://ai-saas-client.onrender.com/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
+
+baseURL:
+"https://ai-saas-server.onrender.com/api",
+
+headers:{
+"Content-Type":"application/json"
+}
+
 });
+
 
 export default api;
