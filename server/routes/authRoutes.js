@@ -5,8 +5,15 @@ const { requireAuth } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
+console.log("✅ authRoutes loaded");
+
+// ========================
+// REGISTER
+// ========================
 router.post("/register", async (req, res) => {
   try {
+    console.log("📌 POST /api/auth/register");
+
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
@@ -23,7 +30,9 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({
+      email: email.toLowerCase(),
+    });
 
     if (existingUser) {
       return res.status(400).json({
@@ -40,15 +49,21 @@ router.post("/register", async (req, res) => {
 
     await user.save();
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET missing");
+    }
+
     const token = jwt.sign(
       {
         id: user._id,
-        email: user.email,
         name: user.name,
+        email: user.email,
         plan: user.plan,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      {
+        expiresIn: "7d",
+      }
     );
 
     return res.status(201).json({
@@ -63,16 +78,22 @@ router.post("/register", async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("REGISTER ERROR:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Server error during registration",
-      error: error.message,
+      message: error.message,
     });
   }
 });
 
+// ========================
+// LOGIN
+// ========================
 router.post("/login", async (req, res) => {
   try {
+    console.log("📌 POST /api/auth/login");
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -82,7 +103,9 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -100,15 +123,21 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET missing");
+    }
+
     const token = jwt.sign(
       {
         id: user._id,
-        email: user.email,
         name: user.name,
+        email: user.email,
         plan: user.plan,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      {
+        expiresIn: "7d",
+      }
     );
 
     return res.status(200).json({
@@ -123,15 +152,19 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("LOGIN ERROR:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Server error during login",
-      error: error.message,
+      message: error.message,
     });
   }
 });
 
-router.get("/me", requireAuth, async (req, res) => {
+// ========================
+// CURRENT USER
+// ========================
+router.get("/me", requireAuth, (req, res) => {
   return res.status(200).json({
     success: true,
     user: req.user,
