@@ -25,28 +25,59 @@ const allowedOrigins = [
 ];
 
 
+// const corsOptions = {
+
+//   origin: function (origin, callback) {
+
+//     // Allow Postman / server requests
+//     if (!origin) {
+//       return callback(null, true);
+//     }
+
+
+//     if (allowedOrigins.includes(origin)) {
+//       return callback(null, true);
+//     }
+
+
+//     console.log("Blocked CORS Origin:", origin);
+
+//     return callback(null, false);
+
+//   },
+
+
+//   methods: [
+//     "GET",
+//     "POST",
+//     "PUT",
+//     "DELETE",
+//     "OPTIONS"
+//   ],
+
+
+//   allowedHeaders: [
+//     "Content-Type",
+//     "Authorization"
+//   ],
+
+
+//   credentials: true,
+
+
+//   optionsSuccessStatus: 204
+
+// };
+
+
+// // CORS MUST BE FIRST
+// app.use(cors(corsOptions));
+
+
+// // Preflight requests
+// app.options("*", cors(corsOptions));
 const corsOptions = {
-
-  origin: function (origin, callback) {
-
-    // Allow Postman / server requests
-    if (!origin) {
-      return callback(null, true);
-    }
-
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-
-    console.log("Blocked CORS Origin:", origin);
-
-    return callback(null, false);
-
-  },
-
-
+  origin: "*",
   methods: [
     "GET",
     "POST",
@@ -54,29 +85,16 @@ const corsOptions = {
     "DELETE",
     "OPTIONS"
   ],
-
-
   allowedHeaders: [
     "Content-Type",
     "Authorization"
   ],
-
-
-  credentials: true,
-
-
-  optionsSuccessStatus: 204
-
 };
 
 
-// CORS MUST BE FIRST
 app.use(cors(corsOptions));
 
-
-// Preflight requests
 app.options("*", cors(corsOptions));
-
 
 
 // ===============================
