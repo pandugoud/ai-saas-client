@@ -1,0 +1,32 @@
+# root
+.env
+*.log
+.DS_Store
+Thumbs.db
+
+# node
+node_modules/
+dist/
+build/
+coverage/
+.npm/
+.vite/
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# uploads / db / cache
+server/uploads/
+ai-service/data/uploads/
+ai-service/data/chroma/
+ai-service/data/cache/
+
+# editor
+.vscode/
+.idea/

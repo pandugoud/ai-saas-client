@@ -1,0 +1,34 @@
+# fastapi
+# uvicorn
+# python-multipart
+# sentence-transformers
+# chromadb
+# pymupdf
+# python-docx
+# requests
+# pydantic
+
+# fastapi
+# uvicorn
+# python-dotenv
+# pymongo
+# requests
+# openai
+# pydantic
+
+# fastapi
+# uvicorn
+# python-dotenv
+# pymongo
+# openai
+# pydantic
+# python-multipart
+
+fastapi
+uvicorn
+pydantic
+pymongo
+sentence-transformers
+python-dotenv
+numpy
+requests
