@@ -24,12 +24,12 @@
 # pydantic
 # python-multipart
 
-groq
 fastapi
 uvicorn
-pydantic
 pymongo
-sentence-transformers
-python-dotenv
 numpy
-requests
+python-dotenv
+groq
+sentence-transformers
+torch==2.3.1+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
