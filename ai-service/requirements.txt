@@ -24,6 +24,7 @@
 # pydantic
 # python-multipart
 
+groq
 fastapi
 uvicorn
 pydantic
