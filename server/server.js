@@ -15,83 +15,66 @@ const PORT = process.env.PORT || 5000;
 
 
 // =====================
-// CORS CONFIG
+// CORS
 // =====================
 
 const allowedOrigins = [
   "http://localhost:5173",
   "https://ai-saas-client-zeta.vercel.app",
-  "https://ai-saas-server.onrender.com",
+  "https://ai-saas-client.onrender.com",
+  "https://pandugoud.github.io"
 ];
 
-app.use(
-  cors({
 
-    origin: function(origin, callback) {
+const corsOptions = {
 
-      // Allow requests without origin
-      // (Postman, mobile apps, server calls)
-      if (!origin) {
-        return callback(null, true);
-      }
+  origin: function(origin, callback){
+
+    console.log("REQUEST ORIGIN:", origin);
 
 
-      if (allowedOrigins.includes(origin)) {
-
-        return callback(null, true);
-
-      }
+    if(!origin){
+      return callback(null,true);
+    }
 
 
-      console.log(
-        "Blocked CORS Origin:",
-        origin
-      );
+    if(allowedOrigins.includes(origin)){
+      return callback(null,true);
+    }
 
 
-      return callback(
-        null,
-        false
-      );
+    return callback(
+      new Error("CORS blocked")
+    );
 
-    },
-
-
-    credentials: true,
+  },
 
 
-    methods: [
-      "GET",
-      "POST",
-      "PUT",
-      "DELETE",
-      "OPTIONS"
-    ],
+  credentials:true,
 
 
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization"
-    ],
-
-  })
-);
-
-
-// Handle preflight
-app.options("*", cors());
+  methods:[
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "OPTIONS"
+  ],
 
 
+  allowedHeaders:[
+    "Content-Type",
+    "Authorization"
+  ]
 
-// =====================
-// MIDDLEWARE
-// =====================
-
-app.use(
-  express.json()
-);
+};
 
 
+// MUST be first middleware
+app.use(cors(corsOptions));
+
+
+// Handle all OPTIONS
 app.use(
   express.urlencoded({
     extended:true
@@ -99,44 +82,38 @@ app.use(
 );
 
 
+app.use(express.json());
+
+
 
 // =====================
 // HEALTH
 // =====================
 
-app.get("/", (req,res)=>{
+
+app.get("/",(req,res)=>{
 
   res.json({
-
     success:true,
-
     message:"AI SaaS Server Running"
+  });
 
+});
+
+
+app.get("/api/health",(req,res)=>{
+
+  res.json({
+    success:true,
+    message:"API Healthy"
   });
 
 });
 
 
 
-app.get(
-  "/api/health",
-  (req,res)=>{
-
-    res.json({
-
-      success:true,
-
-      message:"API Healthy"
-
-    });
-
-  }
-);
-
-
-
 // =====================
-// API ROUTES
+// ROUTES
 // =====================
 
 app.use(
@@ -153,7 +130,7 @@ app.use(
 
 
 // =====================
-// STATIC FRONTEND
+// STATIC
 // =====================
 
 const clientPath = path.join(
@@ -168,7 +145,10 @@ app.use(
 
 
 
-// React routing
+// =====================
+// FRONTEND ROUTES
+// =====================
+
 app.get(
   /^\/(?!api).*/,
   (req,res)=>{
@@ -186,105 +166,65 @@ app.get(
 
 
 // =====================
-// API NOT FOUND
+// ERROR
 // =====================
 
 app.use(
-  "/api/*",
-  (req,res)=>{
+(err,req,res,next)=>{
 
-    res.status(404).json({
-
-      success:false,
-
-      message:"API Route Not Found"
-
-    });
-
-  }
-);
+console.error("ERROR:",err.message);
 
 
+res.status(500).json({
 
-// =====================
-// ERROR HANDLER
-// =====================
+success:false,
 
-app.use(
-  (err,req,res,next)=>{
+message:err.message
 
-    console.error(
-      "Server Error:",
-      err
-    );
+});
 
 
-    res.status(500).json({
-
-      success:false,
-
-      message:err.message
-
-    });
-
-  }
-);
+});
 
 
 
 // =====================
-// START SERVER
+// START
 // =====================
 
 async function startServer(){
 
-  try{
+try{
 
 
-    if(!process.env.MONGO_URI){
-
-      throw new Error(
-        "MONGO_URI missing"
-      );
-
-    }
+await mongoose.connect(
+process.env.MONGO_URI
+);
 
 
-
-    await mongoose.connect(
-      process.env.MONGO_URI
-    );
+console.log("MongoDB Connected");
 
 
-    console.log(
-      "MongoDB Connected"
-    );
+app.listen(
+PORT,
+"0.0.0.0",
+()=>{
+
+console.log(
+`Server running ${PORT}`
+);
+
+});
 
 
+}
+catch(err){
 
-    app.listen(
-      PORT,
-      "0.0.0.0",
-      ()=>{
+console.error(err);
 
-        console.log(
-          `Server running on ${PORT}`
-        );
+process.exit(1);
 
-      }
-    );
-
-
-  }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-    process.exit(1);
-
-  }
+}
 
 }
 
