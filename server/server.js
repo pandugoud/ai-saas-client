@@ -21,8 +21,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:5173",
   "https://ai-saas-client-zeta.vercel.app",
-  "https://ai-saas-client.onrender.com",
-  "https://pandugoud.github.io",
+  "https://ai-saas-server.onrender.com",
 ];
 
 app.use(
