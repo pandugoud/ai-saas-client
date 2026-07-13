@@ -20,17 +20,10 @@ const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
   "http://localhost:5173",
-
-  // Vercel Frontend
   "https://ai-saas-client-zeta.vercel.app",
-
-  // Render Frontend
   "https://ai-saas-client.onrender.com",
-
-  // Github Pages
   "https://pandugoud.github.io",
 ];
-
 
 app.use(
   cors({
