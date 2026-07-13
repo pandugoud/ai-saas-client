@@ -1,4 +1,3 @@
-```python
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -547,4 +546,3 @@ def ask_chat(req:AskRequest):
             500,
             str(e)
         )
-```
