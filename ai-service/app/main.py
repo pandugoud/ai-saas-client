@@ -86,7 +86,8 @@ doc_chunks_col = db["doc_chunks"]
 # =====================
 
 embedder = SentenceTransformer(
-    "all-MiniLM-L6-v2"
+    "all-MiniLM-L6-v2",
+    device="cpu"
 )
 
 
