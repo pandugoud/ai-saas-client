@@ -13,122 +13,288 @@ const generalChatRoutes = require("./routes/generalChatRoutes");
 
 const PORT = process.env.PORT || 5000;
 
+
 // =====================
-// CORS
+// CORS CONFIG
 // =====================
 
 const allowedOrigins = [
   "http://localhost:5173",
+
+  // Vercel Frontend
+  "https://ai-saas-client-zeta.vercel.app",
+
+  // Render Frontend
   "https://ai-saas-client.onrender.com",
+
+  // Github Pages
   "https://pandugoud.github.io",
 ];
 
+
 app.use(
   cors({
-    origin(origin, callback) {
-      if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+    origin: function(origin, callback) {
+
+      // Allow requests without origin
+      // (Postman, mobile apps, server calls)
+      if (!origin) {
         return callback(null, true);
       }
 
-      console.log("Blocked Origin:", origin);
-      return callback(new Error("Not allowed by CORS"));
+
+      if (allowedOrigins.includes(origin)) {
+
+        return callback(null, true);
+
+      }
+
+
+      console.log(
+        "Blocked CORS Origin:",
+        origin
+      );
+
+
+      return callback(
+        null,
+        false
+      );
+
     },
+
+
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+
+
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "OPTIONS"
+    ],
+
+
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization"
+    ],
+
   })
 );
 
+
+// Handle preflight
 app.options("*", cors());
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+
+// =====================
+// MIDDLEWARE
+// =====================
+
+app.use(
+  express.json()
+);
+
+
+app.use(
+  express.urlencoded({
+    extended:true
+  })
+);
+
+
 
 // =====================
 // HEALTH
 // =====================
 
-app.get("/", (req, res) => {
+app.get("/", (req,res)=>{
+
   res.json({
-    success: true,
-    message: "AI SaaS Server Running",
+
+    success:true,
+
+    message:"AI SaaS Server Running"
+
   });
+
 });
 
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "API Healthy",
-  });
-});
+
+
+app.get(
+  "/api/health",
+  (req,res)=>{
+
+    res.json({
+
+      success:true,
+
+      message:"API Healthy"
+
+    });
+
+  }
+);
+
+
 
 // =====================
 // API ROUTES
 // =====================
 
-app.use("/api/auth", authRoutes);
-app.use("/api/chat", generalChatRoutes);
+app.use(
+  "/api/auth",
+  authRoutes
+);
+
+
+app.use(
+  "/api/chat",
+  generalChatRoutes
+);
+
+
 
 // =====================
 // STATIC FRONTEND
 // =====================
 
-const clientPath = path.join(__dirname, "../client/dist");
+const clientPath = path.join(
+  __dirname,
+  "../client/dist"
+);
 
-app.use(express.static(clientPath));
 
-// React routes మాత్రమే
-app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.join(clientPath, "index.html"));
-});
+app.use(
+  express.static(clientPath)
+);
 
-// =====================
-// API 404
-// =====================
 
-app.use("/api/*", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "API Route Not Found",
-  });
-});
 
-// =====================
-// ERROR
-// =====================
+// React routing
+app.get(
+  /^\/(?!api).*/,
+  (req,res)=>{
 
-app.use((err, req, res, next) => {
-  console.error(err);
+    res.sendFile(
+      path.join(
+        clientPath,
+        "index.html"
+      )
+    );
 
-  res.status(500).json({
-    success: false,
-    message: err.message,
-  });
-});
+  }
+);
+
+
 
 // =====================
-// START
+// API NOT FOUND
 // =====================
 
-async function startServer() {
-  try {
-    if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI missing");
+app.use(
+  "/api/*",
+  (req,res)=>{
+
+    res.status(404).json({
+
+      success:false,
+
+      message:"API Route Not Found"
+
+    });
+
+  }
+);
+
+
+
+// =====================
+// ERROR HANDLER
+// =====================
+
+app.use(
+  (err,req,res,next)=>{
+
+    console.error(
+      "Server Error:",
+      err
+    );
+
+
+    res.status(500).json({
+
+      success:false,
+
+      message:err.message
+
+    });
+
+  }
+);
+
+
+
+// =====================
+// START SERVER
+// =====================
+
+async function startServer(){
+
+  try{
+
+
+    if(!process.env.MONGO_URI){
+
+      throw new Error(
+        "MONGO_URI missing"
+      );
+
     }
 
-    await mongoose.connect(process.env.MONGO_URI);
 
-    console.log("✅ MongoDB Connected");
 
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on ${PORT}`);
-    });
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
+    await mongoose.connect(
+      process.env.MONGO_URI
+    );
+
+
+    console.log(
+      "MongoDB Connected"
+    );
+
+
+
+    app.listen(
+      PORT,
+      "0.0.0.0",
+      ()=>{
+
+        console.log(
+          `Server running on ${PORT}`
+        );
+
+      }
+    );
+
+
   }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    process.exit(1);
+
+  }
+
 }
+
 
 startServer();
